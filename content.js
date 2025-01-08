@@ -1,3 +1,5 @@
+
+
 // Function to detect LinkedIn dark mode
 function isLinkedInDarkMode() {
     const htmlClassList = document.documentElement.classList;
@@ -78,6 +80,52 @@ function observeDOMChanges() {
 
     observer.observe(targetNode, observerConfig);
 }
+//
+// Function to clear existing highlights
+function clearHighlights() {
+    const jobDescriptionContainer = document.querySelector('.jobs-box__html-content');
+
+    if (!jobDescriptionContainer) return;
+
+    // Restore the original text by removing the highlighting spans
+    jobDescriptionContainer.innerHTML = jobDescriptionContainer.innerHTML.replace(
+        /<span style="background-color: yellow; color: black;">(.*?)<\/span>/g,
+        '$1'
+    );
+}
+
+// Function to highlight keywords in the job description
+function highlightKeywords(keywords) {
+    const jobDescriptionContainer = document.querySelector('.jobs-box__html-content');
+
+    if (!jobDescriptionContainer || !keywords) return;
+
+    // Clear existing highlights
+    clearHighlights();
+
+    // Escape special characters in the keywords
+    const escapedKeywords = keywords.map(keyword => keyword.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'));
+
+    // Create a regex pattern to match all keywords (case-insensitive)
+    const regexPattern = new RegExp(`\\b(${escapedKeywords.join('|')})\\b`, 'gi');
+
+    // Replace matching keywords with highlighted versions
+    jobDescriptionContainer.innerHTML = jobDescriptionContainer.innerHTML.replace(
+        regexPattern,
+        '<span style="background-color: yellow; color: black;">$&</span>'
+    );
+}
+
+// Listen for messages from the popup or other parts of the extension
+chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
+    if (message.keywords !== undefined) {
+        // Split keywords, trim spaces, and highlight
+        const keywords = message.keywords.split(',').map(kw => kw.trim());
+        highlightKeywords(keywords);
+    }
+});
+
+//
 
 // Initial highlighting
 highlightJobs();

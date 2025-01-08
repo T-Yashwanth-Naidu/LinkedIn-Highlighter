@@ -1,0 +1,49 @@
+Updated Privacy Policy
+Privacy Policy for LinkedIn Job Highlighter
+Effective Date: 01/08/2025
+________________________________________
+Introduction
+The LinkedIn Job Highlighter extension enhances your job search experience on LinkedIn by visually highlighting job statuses such as "Viewed," "Applied," and "Saved," and by enabling keyword-based highlights in job descriptions. Your privacy is important to us, and we are committed to being transparent about how this extension operates and handles user data.
+________________________________________
+Data Collection and Usage
+1.	No Data Collection:
+o	This extension does not collect, store, or transmit any personal or non-personal user data.
+2.	Local Processing Only:
+o	All functionality provided by the extension (e.g., highlighting job statuses or user-defined keywords) operates entirely within your browser.
+o	No data is sent to external servers, third parties, or databases.
+3.	No Tracking:
+o	The extension does not monitor your activity on LinkedIn or any other websites.
+________________________________________
+Permissions
+To function as intended, the extension requires the following permissions:
+1.	activeTab:
+o	Allows the extension to interact with the currently active LinkedIn job page.
+o	This permission is only used to apply visual highlights based on job statuses and user-defined keywords.
+2.	https://www.linkedin.com/jobs/*:
+o	Restricts the extension’s functionality to LinkedIn job pages only.
+Important: These permissions are strictly limited to the enhancement of your LinkedIn job search experience and are not used for any other purposes.
+________________________________________
+Third-Party Access
+This extension:
+•	Does not share, sell, or transfer user data to any third parties.
+•	Operates independently and does not interact with any external entities.
+________________________________________
+Security
+We prioritize your security:
+1.	Client-Side Only:
+o	All processes are executed locally within your browser.
+o	No remote code or scripts are loaded or executed.
+2.	No External Interaction:
+o	The extension does not communicate with external servers, APIs, or databases.
+________________________________________
+Transparency and Consent
+•	This extension does not collect any user data, so no user consent is required.
+•	Permissions are used only to deliver the extension’s described functionality.
+________________________________________
+Changes to This Privacy Policy
+This privacy policy may be updated periodically to reflect new features or changes in Chrome Web Store requirements. Updates will be published alongside the extension on the Chrome Web Store.
+________________________________________
+Contact Us
+If you have any questions or concerns about this privacy policy or the extension:
+•	Email: yashwanthtikkisetty@gmail.com
+

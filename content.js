@@ -1,3 +1,4 @@
+// Added comma seperated values
 let observer; // Declare the observer globally to avoid redundant observers
 
 
@@ -81,10 +82,12 @@ function observeDOMChanges() {
     observer.observe(targetNode, observerConfig);
 }
 
+
+
+// Function to highlight selected keywords in the job description
 // Function to clear existing highlights
 function clearHighlights() {
     const jobDescriptionContainer = document.querySelector('.jobs-box__html-content');
-
     if (!jobDescriptionContainer) return;
 
     jobDescriptionContainer.querySelectorAll('span.highlight').forEach((highlightedSpan) => {
@@ -111,30 +114,54 @@ function highlightKeywords(keywords) {
     // Create regex pattern to match keywords (case insensitive)
     const regexPattern = new RegExp(`\\b(${escapedKeywords.join('|')})\\b`, 'gi');
 
-    // Recursive function to process and highlight text nodes
+    // Process all text nodes recursively
     function processNode(node) {
-        if (node.nodeType === Node.TEXT_NODE && regexPattern.test(node.nodeValue)) {
-            const span = document.createElement('span');
-            span.className = 'highlight';
-            span.style.backgroundColor = 'yellow';
-            span.style.color = 'black';
+        if (node.nodeType === Node.TEXT_NODE) {
+            const matches = node.nodeValue.match(regexPattern);
+            if (matches) {
+                const fragment = document.createDocumentFragment();
+                let lastIndex = 0;
 
-            const tempDiv = document.createElement('div');
-            tempDiv.innerHTML = node.nodeValue.replace(regexPattern, (match) => {
-                return `<span class="highlight" style="background-color: yellow; color: black;">${match}</span>`;
-            });
+                matches.forEach((match) => {
+                    const matchIndex = node.nodeValue.indexOf(match, lastIndex);
 
-            const fragment = document.createDocumentFragment();
-            Array.from(tempDiv.childNodes).forEach((child) => fragment.appendChild(child));
-            node.replaceWith(fragment);
-        } else if (node.nodeType === Node.ELEMENT_NODE && node.childNodes) {
+                    if (matchIndex > lastIndex) {
+                        fragment.appendChild(document.createTextNode(node.nodeValue.slice(lastIndex, matchIndex)));
+                    }
+
+                    const span = document.createElement('span');
+                    span.className = 'highlight';
+                    span.style.backgroundColor = 'yellow';
+                    span.style.color = 'black';
+                    span.textContent = match;
+                    fragment.appendChild(span);
+
+                    lastIndex = matchIndex + match.length;
+                });
+
+                if (lastIndex < node.nodeValue.length) {
+                    fragment.appendChild(document.createTextNode(node.nodeValue.slice(lastIndex)));
+                }
+
+                node.replaceWith(fragment);
+            }
+        } else if (node.nodeType === Node.ELEMENT_NODE) {
             Array.from(node.childNodes).forEach((child) => processNode(child));
         }
     }
 
-    // Process all child nodes of the job description container
     Array.from(jobDescriptionContainer.childNodes).forEach((child) => processNode(child));
 }
+
+
+chrome.runtime.onMessage.addListener((message) => {
+    if (message.keywords) {
+        console.log("Received keywords:", message.keywords);
+        highlightKeywords(message.keywords);
+    }
+});
+
+
 
 // Function to monitor changes in the job description container
 function monitorJobDescription(keywords) {
@@ -161,12 +188,7 @@ chrome.storage.local.get(['keywords'], (result) => {
     monitorJobDescription(keywords);
 });
 
-// Listen for messages from the popup
-chrome.runtime.onMessage.addListener((message) => {
-    if (message.keywords) {
-        monitorJobDescription(message.keywords);
-    }
-});
+
 
 // Function to observe changes in the job description container
 function observeJobContentChanges() {
@@ -185,6 +207,42 @@ function observeJobContentChanges() {
 
     observer.observe(jobDescriptionContainer, { childList: true, subtree: true });
 }
+
+// Function to observe changes in the job description container
+function observeJobDescription(keywords) {
+    const jobDescriptionContainer = document.querySelector('.jobs-box__html-content');
+    if (!jobDescriptionContainer) return;
+
+    if (observer) observer.disconnect(); // Disconnect existing observer if any
+
+    observer = new MutationObserver(() => {
+        highlightKeywords(keywords); // Reapply highlights when the content changes
+    });
+
+    observer.observe(jobDescriptionContainer, { childList: true, subtree: true });
+
+    // Initial highlight for existing content
+    highlightKeywords(keywords);
+}
+
+// Function to observe page navigation and reapply highlights
+function observePageNavigation() {
+    const targetNode = document.body; // Monitor the entire page
+    const observerConfig = { childList: true, subtree: true };
+
+    const navigationObserver = new MutationObserver(() => {
+        // Reload saved keywords and reapply highlights on navigation
+        chrome.storage.local.get(['keywords'], (result) => {
+            const keywords = result.keywords || [];
+            monitorJobDescription(keywords); // Reapply highlights for new job posts
+        });
+    });
+
+    navigationObserver.observe(targetNode, observerConfig);
+}
+
+// Initialize page navigation monitoring
+observePageNavigation();
 
 // Initial setup
 observeJobContentChanges();

@@ -7,10 +7,15 @@
             font-family: Arial, sans-serif;
             padding: 20px;
         }
-        #keywords {
-            width: 100%;
-            padding: 10px;
-            margin: 10px 0;
+        .keyword-list {
+            list-style-type: none;
+            padding: 0;
+            max-height: 200px;
+            overflow-y: auto;
+            margin-bottom: 10px;
+        }
+        .keyword-list li {
+            margin-bottom: 10px;
         }
         button {
             padding: 10px 20px;
@@ -18,14 +23,24 @@
             color: white;
             border: none;
             cursor: pointer;
+            margin-right: 10px;
+        }
+        #add-keyword {
+            padding: 8px;
+            margin-right: 10px;
+            width: 100%; /* Full width for longer typing box */
+            box-sizing: border-box;
         }
     </style>
 </head>
 <body>
     <h2>LinkedIn Job Highlighter</h2>
-    <label for="keywords">Enter keywords to highlight (comma-separated):</label>
-    <input type="text" id="keywords" placeholder="e.g., engineering, design, CAD">
-    <button id="highlight-btn">Highlight Keywords</button>
+    <p>Enter keywords and click "Add" to save them:</p>
+    <input type="text" id="add-keyword" placeholder="Enter keyword" />
+    <button id="add-btn">Add</button>
+    <ul class="keyword-list" id="keyword-list"></ul>
+    <button id="highlight-btn">Apply Highlights</button>
+    <button id="reset-btn">Reset</button>
     <script src="popup.js"></script>
 </body>
 </html>

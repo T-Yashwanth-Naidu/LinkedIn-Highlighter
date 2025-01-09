@@ -1,3 +1,4 @@
+let observer; // Declare the observer globally to avoid redundant observers
 
 
 // Function to detect LinkedIn dark mode
@@ -67,7 +68,6 @@ function highlightJobs() {
 }
 
 
-                
 
 // Function to set up MutationObserver
 function observeDOMChanges() {
@@ -80,53 +80,114 @@ function observeDOMChanges() {
 
     observer.observe(targetNode, observerConfig);
 }
-//
+
 // Function to clear existing highlights
 function clearHighlights() {
     const jobDescriptionContainer = document.querySelector('.jobs-box__html-content');
 
     if (!jobDescriptionContainer) return;
 
-    // Restore the original text by removing the highlighting spans
-    jobDescriptionContainer.innerHTML = jobDescriptionContainer.innerHTML.replace(
-        /<span style="background-color: yellow; color: black;">(.*?)<\/span>/g,
-        '$1'
-    );
+    jobDescriptionContainer.querySelectorAll('span.highlight').forEach((highlightedSpan) => {
+        const parent = highlightedSpan.parentNode;
+        parent.replaceChild(document.createTextNode(highlightedSpan.textContent), highlightedSpan);
+        parent.normalize(); // Merge adjacent text nodes
+    });
 }
 
-// Function to highlight keywords in the job description
+// Function to highlight selected keywords in the job description
 function highlightKeywords(keywords) {
     const jobDescriptionContainer = document.querySelector('.jobs-box__html-content');
 
-    if (!jobDescriptionContainer || !keywords) return;
+    if (!jobDescriptionContainer || !keywords || keywords.length === 0) return;
 
     // Clear existing highlights
     clearHighlights();
 
     // Escape special characters in the keywords
-    const escapedKeywords = keywords.map(keyword => keyword.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'));
+    const escapedKeywords = keywords.map((keyword) =>
+        keyword.replace(/([.*+?^${}()|[\]\\])/g, '\\$1').trim()
+    );
 
-    // Create a regex pattern to match all keywords (case-insensitive)
+    // Create regex pattern to match keywords (case insensitive)
     const regexPattern = new RegExp(`\\b(${escapedKeywords.join('|')})\\b`, 'gi');
 
-    // Replace matching keywords with highlighted versions
-    jobDescriptionContainer.innerHTML = jobDescriptionContainer.innerHTML.replace(
-        regexPattern,
-        '<span style="background-color: yellow; color: black;">$&</span>'
-    );
+    // Recursive function to process and highlight text nodes
+    function processNode(node) {
+        if (node.nodeType === Node.TEXT_NODE && regexPattern.test(node.nodeValue)) {
+            const span = document.createElement('span');
+            span.className = 'highlight';
+            span.style.backgroundColor = 'yellow';
+            span.style.color = 'black';
+
+            const tempDiv = document.createElement('div');
+            tempDiv.innerHTML = node.nodeValue.replace(regexPattern, (match) => {
+                return `<span class="highlight" style="background-color: yellow; color: black;">${match}</span>`;
+            });
+
+            const fragment = document.createDocumentFragment();
+            Array.from(tempDiv.childNodes).forEach((child) => fragment.appendChild(child));
+            node.replaceWith(fragment);
+        } else if (node.nodeType === Node.ELEMENT_NODE && node.childNodes) {
+            Array.from(node.childNodes).forEach((child) => processNode(child));
+        }
+    }
+
+    // Process all child nodes of the job description container
+    Array.from(jobDescriptionContainer.childNodes).forEach((child) => processNode(child));
 }
 
-// Listen for messages from the popup or other parts of the extension
-chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
-    if (message.keywords !== undefined) {
-        // Split keywords, trim spaces, and highlight
-        const keywords = message.keywords.split(',').map(kw => kw.trim());
-        highlightKeywords(keywords);
+// Function to monitor changes in the job description container
+function monitorJobDescription(keywords) {
+    const jobDescriptionContainer = document.querySelector('.jobs-box__html-content');
+    if (!jobDescriptionContainer) return;
+
+    if (observer) observer.disconnect(); // Disconnect existing observer
+
+    observer = new MutationObserver(() => {
+        observer.disconnect(); // Temporarily disconnect to avoid loops
+        highlightKeywords(keywords); // Reapply highlights
+        observer.observe(jobDescriptionContainer, { childList: true, subtree: true });
+    });
+
+    observer.observe(jobDescriptionContainer, { childList: true, subtree: true });
+
+    // Initial highlight for existing content
+    highlightKeywords(keywords);
+}
+
+// Load saved keywords and monitor the job description for changes
+chrome.storage.local.get(['keywords'], (result) => {
+    const keywords = result.keywords || [];
+    monitorJobDescription(keywords);
+});
+
+// Listen for messages from the popup
+chrome.runtime.onMessage.addListener((message) => {
+    if (message.keywords) {
+        monitorJobDescription(message.keywords);
     }
 });
 
-//
+// Function to observe changes in the job description container
+function observeJobContentChanges() {
+    const jobDescriptionContainer = document.querySelector('.jobs-box__html-content');
 
+    if (!jobDescriptionContainer) return;
+
+    // Set up MutationObserver to monitor changes in the job description container
+    const observer = new MutationObserver(() => {
+        chrome.runtime.onMessage.addListener((message) => {
+            if (message.keywords) {
+                highlightKeywords(message.keywords); // Reapply highlights when keywords change
+            }
+        });
+    });
+
+    observer.observe(jobDescriptionContainer, { childList: true, subtree: true });
+}
+
+// Initial setup
+observeJobContentChanges();
 // Initial highlighting
 highlightJobs();
 

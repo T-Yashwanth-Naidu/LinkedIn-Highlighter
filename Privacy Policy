@@ -1,49 +1,83 @@
-Updated Privacy Policy
 Privacy Policy for LinkedIn Job Highlighter
-Effective Date: 01/08/2025
+Last Updated: January 08, 2025
+This Privacy Policy explains how the LinkedIn Job Highlighter browser extension collects, uses, and handles user data. We are committed to protecting your privacy and ensuring compliance with Chrome Web Store policies.
 ________________________________________
 Introduction
-The LinkedIn Job Highlighter extension enhances your job search experience on LinkedIn by visually highlighting job statuses such as "Viewed," "Applied," and "Saved," and by enabling keyword-based highlights in job descriptions. Your privacy is important to us, and we are committed to being transparent about how this extension operates and handles user data.
+The LinkedIn Job Highlighter extension is designed to enhance your LinkedIn job search experience by:
+1.	Highlighting job statuses like "Viewed," "Applied," and "Saved."
+2.	Allowing users to specify and highlight keywords in job descriptions.
+This extension operates entirely within your browser and does not collect, transmit, or share personal data. By using this extension, you agree to the terms outlined in this Privacy Policy.
+________________________________________
+Key Definitions
+For the purposes of this Privacy Policy:
+•	Extension: Refers to the LinkedIn Job Highlighter Chrome extension.
+•	Host Permissions: Limited access granted to specific web pages (e.g., LinkedIn job pages) to apply features.
+•	Personal Data: Information that directly or indirectly identifies a user, such as name, email, or browsing history.
+•	You: The individual or entity using this extension.
 ________________________________________
 Data Collection and Usage
-1.	No Data Collection:
-o	This extension does not collect, store, or transmit any personal or non-personal user data.
-2.	Local Processing Only:
-o	All functionality provided by the extension (e.g., highlighting job statuses or user-defined keywords) operates entirely within your browser.
-o	No data is sent to external servers, third parties, or databases.
-3.	No Tracking:
-o	The extension does not monitor your activity on LinkedIn or any other websites.
+1. No Personal Data Collection
+This extension does not collect, process, or transmit any personal data. Specifically:
+•	No user identification data (e.g., names, email addresses) is collected.
+•	No tracking of browsing behavior on LinkedIn or other websites occurs.
+•	No information is sent to external servers or databases.
+2. Local Processing
+All extension functionalities are performed locally in your browser. Examples include:
+•	Detecting LinkedIn job statuses and applying visual highlights.
+•	Highlighting user-specified keywords in job descriptions.
+3. Usage Data
+The extension does not collect or store any usage data such as:
+•	Browsing history.
+•	Interaction patterns with LinkedIn or other websites.
+•	Analytics about feature usage.
 ________________________________________
-Permissions
-To function as intended, the extension requires the following permissions:
-1.	activeTab:
-o	Allows the extension to interact with the currently active LinkedIn job page.
-o	This permission is only used to apply visual highlights based on job statuses and user-defined keywords.
-2.	https://www.linkedin.com/jobs/*:
-o	Restricts the extension’s functionality to LinkedIn job pages only.
-Important: These permissions are strictly limited to the enhancement of your LinkedIn job search experience and are not used for any other purposes.
+Permissions and Their Use
+The LinkedIn Job Highlighter requests minimal permissions necessary to deliver its functionality:
+1. host_permissions
+•	Scope: https://www.linkedin.com/jobs/*
+•	Purpose: Allows the extension to access LinkedIn job pages to dynamically apply highlights for job statuses and keywords.
+•	Limitation: This permission is strictly restricted to LinkedIn job pages and does not extend to other parts of the site or unrelated websites.
+2. Content Scripts
+•	Purpose: Injects scripts into LinkedIn job pages to analyze and update the page's visual elements for highlighting purposes.
+•	Limitation: Content scripts operate only on LinkedIn job pages and do not interact with external servers or APIs.
 ________________________________________
 Third-Party Access
-This extension:
-•	Does not share, sell, or transfer user data to any third parties.
-•	Operates independently and does not interact with any external entities.
+This extension does not:
+•	Share any data with third-party entities.
+•	Integrate third-party tracking scripts or analytics tools.
+•	Transmit user data to any external servers or databases.
 ________________________________________
-Security
-We prioritize your security:
-1.	Client-Side Only:
-o	All processes are executed locally within your browser.
-o	No remote code or scripts are loaded or executed.
-2.	No External Interaction:
-o	The extension does not communicate with external servers, APIs, or databases.
+Security Measures
+We take the security of your data seriously:
+•	All processes are executed locally within your browser.
+•	The extension does not use remote code execution or external APIs.
+•	No network requests are made from the extension.
 ________________________________________
-Transparency and Consent
-•	This extension does not collect any user data, so no user consent is required.
-•	Permissions are used only to deliver the extension’s described functionality.
+Your Privacy Rights
+Since no personal data is collected or stored, there are no specific user privacy controls required. However, as a user, you have the following assurances:
+1.	Transparency: This privacy policy outlines all relevant data handling practices.
+2.	Control: The extension's functionality is entirely local, ensuring no external dependencies.
+________________________________________
+Children’s Privacy
+The LinkedIn Job Highlighter does not target individuals under the age of 13. The extension does not collect any data, making it inherently safe for all users.
 ________________________________________
 Changes to This Privacy Policy
-This privacy policy may be updated periodically to reflect new features or changes in Chrome Web Store requirements. Updates will be published alongside the extension on the Chrome Web Store.
+We may update this Privacy Policy periodically to reflect new features or changes in compliance requirements. Updates will be posted in the Chrome Web Store listing, and the "Last Updated" date will be revised accordingly.
 ________________________________________
-Contact Us
-If you have any questions or concerns about this privacy policy or the extension:
+Contact Information
+If you have questions or concerns about this Privacy Policy or the LinkedIn Job Highlighter extension, please contact us at:
 •	Email: yashwanthtikkisetty@gmail.com
+________________________________________
+Summary of Compliance
+•	Data Collection: No data is collected, stored, or shared.
+•	Permissions: Limited to host permissions (https://www.linkedin.com/jobs/*) for applying visual highlights.
+•	Local Processing: All functionalities operate entirely within your browser.
+________________________________________
+FAQs About Privacy
+Q1: Does the extension track my activity on LinkedIn?
+No, the extension does not monitor or log your activity. It only highlights job statuses and user-defined keywords on LinkedIn job pages.
+Q2: Are any external servers contacted?
+No. The extension does not make network requests or communicate with external servers.
+Q3: How secure is this extension?
+The extension is entirely client-side, meaning all processing happens within your browser without any external dependencies.
 

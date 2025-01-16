@@ -184,11 +184,17 @@ chrome.storage.local.get(['keywords'], (result) => {
 // ===============================
 // Message Listener for Keyword Updates
 // ===============================
-chrome.runtime.onMessage.addListener((message) => {
+chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
     if (message.keywords) {
-        highlightKeywords(message.keywords);
+        console.log("Received keywords:", message.keywords); // Debug log
+        highlightKeywords(message.keywords); // Call your highlighting function
+        sendResponse({ status: "success", keywords: message.keywords });
+    } else {
+        console.error("No keywords received.");
+        sendResponse({ status: "error", message: "No keywords provided." });
     }
 });
+
 
 // ===============================
 // Initialize Observers and Highlights

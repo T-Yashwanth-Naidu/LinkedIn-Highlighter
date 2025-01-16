@@ -1,29 +1,32 @@
-// Added comma seperated values
-let observer; // Declare the observer globally to avoid redundant observers
+// Declare a global observer to avoid redundant MutationObservers
+let observer;
 
-
-// Function to detect LinkedIn dark mode
+// ===============================
+// Detect LinkedIn Dark Mode
+// ===============================
 function isLinkedInDarkMode() {
     const htmlClassList = document.documentElement.classList;
     return htmlClassList.contains('theme--dark-lix'); // LinkedIn dark mode indicator
 }
 
-// Function to apply highlights to job cards
+// ===============================
+// Highlight Job Cards Based on State
+// ===============================
 function highlightJobs() {
     const jobCards = document.querySelectorAll('.job-card-container'); // Select all job cards
     const darkMode = isLinkedInDarkMode(); // Detect if dark mode is active
 
     jobCards.forEach((jobCard) => {
-        // Find the footer state
+        // Find the footer state element
         const jobStateElement = jobCard.querySelector('.job-card-container__footer-job-state');
         if (!jobStateElement) return; // Skip if no job state exists
 
-        const jobState = jobStateElement.textContent.trim();
+        const jobState = jobStateElement.textContent.trim(); // Get the job state text
 
         // Apply styles based on job state
         if (jobState === "Viewed") {
             jobCard.style.backgroundColor = darkMode ? "#807800" : "yellow"; // Dark yellow or yellow
-            jobCard.style.color = darkMode ? "white" : "black"; // Adjust text color
+            jobCard.style.color = darkMode ? "white" : "black";
         } else if (jobState === "Applied") {
             jobCard.style.backgroundColor = darkMode ? "#003d00" : "lightgreen"; // Dark green or light green
             jobCard.style.color = darkMode ? "white" : "black";
@@ -32,60 +35,50 @@ function highlightJobs() {
             jobCard.style.color = darkMode ? "white" : "black";
         }
 
-        // Style titles
+        // Apply dark/light mode styling to additional job card elements
         const title = jobCard.querySelector('.artdeco-entity-lockup__title');
-        if (title) {
-            title.style.color = darkMode ? "white" : "black";
-        }
+        if (title) title.style.color = darkMode ? "white" : "black";
 
-        // Style subtitles (company names)
         const subtitle = jobCard.querySelector('.artdeco-entity-lockup__subtitle span');
-        if (subtitle) {
-            subtitle.style.color = darkMode ? "white" : "black";
-        }
+        if (subtitle) subtitle.style.color = darkMode ? "white" : "black";
 
-            // Style captions (e.g., location) - ember178
         const caption = jobCard.querySelector('.artdeco-entity-lockup__caption span');
-        if (caption) {
-            caption.style.color = darkMode ? "white" : "black";
-        }
+        if (caption) caption.style.color = darkMode ? "white" : "black";
 
-        // Style metadata (e.g., location, benefits)
         const metadata = jobCard.querySelectorAll('.artdeco-entity-lockup__metadata span, .job-card-container__job-insight-text');
         metadata.forEach((item) => {
             item.style.color = darkMode ? "white" : "black";
         });
 
-        if (jobStateElement) {
-            jobStateElement.style.color = darkMode ? "white" : "black";
-            jobStateElement.style.fontWeight = "bold"; // Add bold styling
-        }
-        // Style footer items (e.g., Promoted, Easy Apply)
         const footerItems = jobCard.querySelectorAll('.job-card-container__footer-wrapper li span');
         footerItems.forEach((item) => {
             item.style.color = darkMode ? "white" : "black";
         });
+
+        if (jobStateElement) {
+            jobStateElement.style.color = darkMode ? "white" : "black";
+            jobStateElement.style.fontWeight = "bold"; // Bold styling for job state
+        }
     });
 }
 
-
-
-// Function to set up MutationObserver
+// ===============================
+// Observe DOM Changes for Job Cards
+// ===============================
 function observeDOMChanges() {
-    const targetNode = document.body;
+    const targetNode = document.body; // Monitor the entire page for changes
     const observerConfig = { childList: true, subtree: true };
 
     const observer = new MutationObserver(() => {
-        highlightJobs(); // Apply highlights whenever DOM changes
+        highlightJobs(); // Reapply highlights when the DOM changes
     });
 
     observer.observe(targetNode, observerConfig);
 }
 
-
-
-// Function to highlight selected keywords in the job description
-// Function to clear existing highlights
+// ===============================
+// Clear Existing Keyword Highlights
+// ===============================
 function clearHighlights() {
     const jobDescriptionContainer = document.querySelector('.jobs-box__html-content');
     if (!jobDescriptionContainer) return;
@@ -97,24 +90,28 @@ function clearHighlights() {
     });
 }
 
-// Function to highlight selected keywords in the job description
+// ===============================
+// Highlight Selected Keywords in Job Descriptions
+// ===============================
 function highlightKeywords(keywords) {
     const jobDescriptionContainer = document.querySelector('.jobs-box__html-content');
-
     if (!jobDescriptionContainer || !keywords || keywords.length === 0) return;
 
     // Clear existing highlights
     clearHighlights();
 
-    // Escape special characters in the keywords
+    // Escape special characters in keywords for regex
     const escapedKeywords = keywords.map((keyword) =>
         keyword.replace(/([.*+?^${}()|[\]\\])/g, '\\$1').trim()
     );
 
-    // Create regex pattern to match keywords (case insensitive)
     const regexPattern = new RegExp(`\\b(${escapedKeywords.join('|')})\\b`, 'gi');
 
-    // Process all text nodes recursively
+    // Define keywords for red highlighting
+    const redKeywords = ['U.S. Security Clearance', 'Clearance', 'Secret', 'Citizen', 'GC', 'Citizenship'];
+    const redKeywordsRegex = new RegExp(`\\b(${redKeywords.map((k) => k.replace(/([.*+?^${}()|[\]\\])/g, '\\$1')).join('|')})\\b`, 'gi');
+
+    // Highlight text nodes recursively
     function processNode(node) {
         if (node.nodeType === Node.TEXT_NODE) {
             const matches = node.nodeValue.match(regexPattern);
@@ -131,8 +128,14 @@ function highlightKeywords(keywords) {
 
                     const span = document.createElement('span');
                     span.className = 'highlight';
-                    span.style.backgroundColor = 'yellow';
-                    span.style.color = 'black';
+
+                    if (redKeywordsRegex.test(match)) {
+                        span.style.backgroundColor = 'red'; // Red for specific keywords
+                        span.style.color = 'white';
+                    } else {
+                        span.style.backgroundColor = 'yellow'; // Yellow for others
+                        span.style.color = 'black';
+                    }
                     span.textContent = match;
                     fragment.appendChild(span);
 
@@ -153,101 +156,48 @@ function highlightKeywords(keywords) {
     Array.from(jobDescriptionContainer.childNodes).forEach((child) => processNode(child));
 }
 
-
-chrome.runtime.onMessage.addListener((message) => {
-    if (message.keywords) {
-        console.log("Received keywords:", message.keywords);
-        highlightKeywords(message.keywords);
-    }
-});
-
-
-
-// Function to monitor changes in the job description container
+// ===============================
+// Monitor Job Descriptions for Changes
+// ===============================
 function monitorJobDescription(keywords) {
     const jobDescriptionContainer = document.querySelector('.jobs-box__html-content');
     if (!jobDescriptionContainer) return;
 
-    if (observer) observer.disconnect(); // Disconnect existing observer
+    if (observer) observer.disconnect();
 
     observer = new MutationObserver(() => {
-        observer.disconnect(); // Temporarily disconnect to avoid loops
-        highlightKeywords(keywords); // Reapply highlights
-        observer.observe(jobDescriptionContainer, { childList: true, subtree: true });
+        highlightKeywords(keywords);
     });
 
     observer.observe(jobDescriptionContainer, { childList: true, subtree: true });
-
-    // Initial highlight for existing content
     highlightKeywords(keywords);
 }
 
-// Load saved keywords and monitor the job description for changes
+// ===============================
+// Load and Apply Saved Keywords
+// ===============================
 chrome.storage.local.get(['keywords'], (result) => {
     const keywords = result.keywords || [];
     monitorJobDescription(keywords);
 });
 
+// ===============================
+// Message Listener for Keyword Updates
+// ===============================
+chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
+    if (message.keywords) {
+        console.log("Received keywords:", message.keywords); // Debug log
+        highlightKeywords(message.keywords); // Call your highlighting function
+        sendResponse({ status: "success", keywords: message.keywords });
+    } else {
+        console.error("No keywords received.");
+        sendResponse({ status: "error", message: "No keywords provided." });
+    }
+});
 
 
-// Function to observe changes in the job description container
-function observeJobContentChanges() {
-    const jobDescriptionContainer = document.querySelector('.jobs-box__html-content');
-
-    if (!jobDescriptionContainer) return;
-
-    // Set up MutationObserver to monitor changes in the job description container
-    const observer = new MutationObserver(() => {
-        chrome.runtime.onMessage.addListener((message) => {
-            if (message.keywords) {
-                highlightKeywords(message.keywords); // Reapply highlights when keywords change
-            }
-        });
-    });
-
-    observer.observe(jobDescriptionContainer, { childList: true, subtree: true });
-}
-
-// Function to observe changes in the job description container
-function observeJobDescription(keywords) {
-    const jobDescriptionContainer = document.querySelector('.jobs-box__html-content');
-    if (!jobDescriptionContainer) return;
-
-    if (observer) observer.disconnect(); // Disconnect existing observer if any
-
-    observer = new MutationObserver(() => {
-        highlightKeywords(keywords); // Reapply highlights when the content changes
-    });
-
-    observer.observe(jobDescriptionContainer, { childList: true, subtree: true });
-
-    // Initial highlight for existing content
-    highlightKeywords(keywords);
-}
-
-// Function to observe page navigation and reapply highlights
-function observePageNavigation() {
-    const targetNode = document.body; // Monitor the entire page
-    const observerConfig = { childList: true, subtree: true };
-
-    const navigationObserver = new MutationObserver(() => {
-        // Reload saved keywords and reapply highlights on navigation
-        chrome.storage.local.get(['keywords'], (result) => {
-            const keywords = result.keywords || [];
-            monitorJobDescription(keywords); // Reapply highlights for new job posts
-        });
-    });
-
-    navigationObserver.observe(targetNode, observerConfig);
-}
-
-// Initialize page navigation monitoring
-observePageNavigation();
-
-// Initial setup
-observeJobContentChanges();
-// Initial highlighting
-highlightJobs();
-
-// Observe DOM changes
+// ===============================
+// Initialize Observers and Highlights
+// ===============================
 observeDOMChanges();
+highlightJobs();

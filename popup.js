@@ -1,162 +1,106 @@
-// Wait for the DOM content to be fully loaded
 document.addEventListener('DOMContentLoaded', () => {
-    // DOM element references
-    const addKeywordBtn = document.getElementById('add-keyword-btn');
-    const keywordBox = document.getElementById('keyword-box');
-    const keywordsContainer = document.getElementById('keywords-container');
-    const applyHighlightsBtn = document.getElementById('apply-highlights-btn');
+
+    const addBtn = document.getElementById('add-keyword-btn');
+    const input = document.getElementById('keyword-box');
+    const container = document.getElementById('keywords-container');
+    const applyBtn = document.getElementById('apply-highlights-btn');
     const resetBtn = document.getElementById('reset-btn');
 
-    /**
-     * Function to add multiple keywords.
-     * - Splits input by commas, trims whitespace, and removes empty entries.
-     * - Creates a checkbox for each keyword.
-     * - Appends each checkbox to the keywords container.
-     */
     function addKeywords() {
-        const input = keywordBox.value.trim();
-        if (input === '') return; // Exit if input is empty
+        const value = input.value.trim();
+        if (!value) return;
 
-        // Split input into keywords and filter out empty strings
-        const keywords = input.split(',').map((keyword) => keyword.trim()).filter((keyword) => keyword !== '');
+        const list = value.split(',').map(k => k.trim()).filter(Boolean);
 
-        keywords.forEach((keyword) => {
-            // Create a container for the keyword
-            const keywordItem = document.createElement('div');
-            keywordItem.className = 'keyword-item';
+        list.forEach(k => {
+            const div = document.createElement('div');
 
-            // Create a checkbox for the keyword
-            const checkbox = document.createElement('input');
-            checkbox.type = 'checkbox';
-            checkbox.checked = true; // Checked by default
-            checkbox.value = keyword;
+            const cb = document.createElement('input');
+            cb.type = "checkbox";
+            cb.checked = true;
+            cb.value = k;
 
-            // Create a label for the keyword
             const label = document.createElement('label');
-            label.textContent = keyword;
+            label.textContent = k;
 
-            // Append checkbox and label to the container
-            keywordItem.appendChild(checkbox);
-            keywordItem.appendChild(label);
-
-            // Add the container to the keywords list
-            keywordsContainer.appendChild(keywordItem);
+            div.append(cb, label);
+            container.appendChild(div);
         });
 
-        // Clear the input field and save the updated keywords
-        keywordBox.value = '';
-        saveKeywords();
+        input.value = "";
+        save();
     }
 
-    /**
-     * Function to save keywords to Chrome storage.
-     * - Retrieves all checked keywords.
-     * - Stores them in Chrome's local storage.
-     */
-    function saveKeywords() {
-        const keywords = [];
-        const checkboxes = keywordsContainer.querySelectorAll('input[type="checkbox"]');
+    function save() {
+        const keywords = [...container.querySelectorAll("input:checked")]
+            .map(c => c.value);
 
-        checkboxes.forEach((checkbox) => {
-            if (checkbox.checked) {
-                keywords.push(checkbox.value);
-            }
-        });
-
-        // Save keywords to Chrome storage
         chrome.storage.local.set({ keywords });
     }
 
-    /**
-     * Function to load saved keywords from Chrome storage.
-     * - Recreates the keyword checkboxes from stored data.
-     */
-    function loadKeywords() {
-        chrome.storage.local.get(['keywords'], (result) => {
-            const keywords = result.keywords || [];
+    function load() {
+        chrome.storage.local.get(['keywords'], ({ keywords = [] }) => {
+            keywords.forEach(k => {
+                const div = document.createElement('div');
 
-            keywords.forEach((keyword) => {
-                // Create a container for the keyword
-                const keywordItem = document.createElement('div');
-                keywordItem.className = 'keyword-item';
+                const cb = document.createElement('input');
+                cb.type = "checkbox";
+                cb.checked = true;
+                cb.value = k;
 
-                // Create a checkbox for the keyword
-                const checkbox = document.createElement('input');
-                checkbox.type = 'checkbox';
-                checkbox.checked = true; // Checked by default
-                checkbox.value = keyword;
-
-                // Create a label for the keyword
                 const label = document.createElement('label');
-                label.textContent = keyword;
+                label.textContent = k;
 
-                // Append checkbox and label to the container
-                keywordItem.appendChild(checkbox);
-                keywordItem.appendChild(label);
-
-                // Add the container to the keywords list
-                keywordsContainer.appendChild(keywordItem);
+                div.append(cb, label);
+                container.appendChild(div);
             });
         });
     }
 
-    /**
-     * Event listener for the "Add" button.
-     * - Triggers the `addKeywords` function to process input keywords.
-     */
-    addKeywordBtn.addEventListener('click', addKeywords);
+    addBtn.onclick = addKeywords;
 
-    /**
-     * Event listener for the Enter key in the input box.
-     * - Triggers the `addKeywords` function when Enter is pressed.
-     */
-    keywordBox.addEventListener('keydown', (event) => {
-        if (event.key === 'Enter') {
-            event.preventDefault(); // Prevent default form submission
+    input.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter') {
+            e.preventDefault();
             addKeywords();
         }
     });
 
-    /**
-     * Event listener for the "Apply Highlights" button.
-     * - Sends the list of keywords to the active tab.
-     */
-    applyHighlightsBtn.addEventListener('click', () => {
-        const keywords = [];
-        const checkboxes = keywordsContainer.querySelectorAll('input[type="checkbox"]');
+    applyBtn.onclick = () => {
+        const keywords = [...container.querySelectorAll("input:checked")]
+            .map(c => c.value);
 
-        // Collect all checked keywords
-        checkboxes.forEach((checkbox) => {
-            if (checkbox.checked) {
-                keywords.push(checkbox.value);
-            }
-        });
-
-        // Send keywords to the active tab
         chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
-            if (tabs[0]?.id) {
-                chrome.tabs.sendMessage(tabs[0].id, { keywords }, (response) => {
-                    if (chrome.runtime.lastError) {
-                        console.error("Error sending message:", chrome.runtime.lastError.message);
-                    } else {
-                        console.log("Message sent successfully:", response);
-                    }
-                });
-            } else {
-                console.error("No active tab found.");
-            }
+            const tabId = tabs[0]?.id;
+            if (!tabId) return;
+
+            chrome.tabs.sendMessage(tabId, { keywords }, () => {
+                if (chrome.runtime.lastError) {
+
+                    chrome.scripting.executeScript({
+                        target: { tabId },
+                        files: ["content.js"]
+                    }, () => {
+                        chrome.tabs.sendMessage(tabId, { keywords });
+                    });
+
+                }
+            });
         });
-    });
+    };
 
-    /**
-     * Event listener for the "Reset" button.
-     * - Clears the keyword list and removes stored keywords from Chrome storage.
-     */
-    resetBtn.addEventListener('click', () => {
-        keywordsContainer.innerHTML = ''; // Clear the keywords container
-        chrome.storage.local.set({ keywords: [] }); // Remove stored keywords
-    });
+resetBtn.onclick = () => {
+    container.innerHTML = "";
+    chrome.storage.local.set({ keywords: [] });
 
-    // Load saved keywords when the popup opens
-    loadKeywords();
+    // Notify content script to clear highlights
+    chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
+        const tabId = tabs[0]?.id;
+        if (!tabId) return;
+
+        chrome.tabs.sendMessage(tabId, { action: "CLEAR_HIGHLIGHTS" });
+    });
+};
+
+    load();
 });

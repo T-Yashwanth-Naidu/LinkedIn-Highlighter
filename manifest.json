@@ -1,13 +1,10 @@
 {
-    "manifest_version": 4,
+    "manifest_version": 6,
     "name": "LinkedIn Job Highlighter",
-    "version": "4.0",
+    "version": "2.0",
     "description": "Highlights keywords on LinkedIn Jobs pages.",
     "permissions": ["scripting", "webNavigation", "activeTab", "storage"],
-    "host_permissions": ["https://www.linkedin.com/jobs/*"],
-    "background": {
-        "service_worker": "background.js"
-    },
+    "host_permissions": ["https://www.linkedin.com/jobs/*"],    
     "content_scripts": [
         {
             "matches": ["https://www.linkedin.com/jobs/*"],
